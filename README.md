@@ -14,21 +14,18 @@ Ensure you have the following installed on your system:
 
 ## Instructions
 
+### Fork the Repository
 Before you start, fork this repository to your own GitHub account.
+Click on the "Fork" button at the top right corner of this repository's GitHub page to create your own copy.
 
-1. **Fork the Repository:**
-
-   Click on the "Fork" button at the top right corner of this repository's GitHub page to create your own copy.
-
-2. **Clone the Repository:**
-
+### Clone the Repository
 ```bash
 git clone <your-forked-repository-url>
 cd <repository-directory>
 ```
 
 ## How to make your paper
-1. Compile the LaTeX Document:
+### Compile the LaTeX Document
 
 Simply run the make command in the terminal:
 
@@ -36,14 +33,14 @@ Simply run the make command in the terminal:
 make
 ```
 
-2. Clean Up Auxiliary Files:
+### Clean Up Auxiliary Files
 To remove auxiliary files generated during the compilation, use:
 
 ```bash
 make clean
 ```
 
-3. Full Clean-Up:
+### Full Clean-Up
 
 ```bash
 make distclean
