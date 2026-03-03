@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTT Generated PDFs</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+        .pdf-list {
+            list-style: none;
+            padding: 0;
+        }
+        .pdf-item {
+            background: #f8f9fa;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #007acc;
+        }
+        .pdf-link {
+            text-decoration: none;
+            color: #007acc;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+        .pdf-link:hover {
+            text-decoration: underline;
+        }
+        .build-info {
+            background: #e9ecef;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>OTT Generated Documents</h1>
+        <p>Automatically generated PDF documents from the OTT project</p>
+    </div>
+
+    <ul class="pdf-list">
+                <li class="pdf-item">
+                    <a href="main.pdf" class="pdf-link">📄 main.pdf</a>
+                </li>
+                <li class="pdf-item">
+                    <a href="supplementary_main.pdf" class="pdf-link">📄 supplementary_main.pdf</a>
+                </li>
+    </ul>
+
+    <div class="build-info">
+        <strong>Build Information:</strong><br>
+        Generated: <span id="build-date"></span><br>
+        Commit: <a href="https://github.com/prg-titech/acmart-prg-template/commit/0f3fd7712c95712f3afe0e8c4cfcb0ba4e658949">0f3fd7712c95712f3afe0e8c4cfcb0ba4e658949</a><br>
+        Branch: main
+    </div>
+
+    <script>
+        document.getElementById('build-date').textContent = new Date().toLocaleString();
+    </script>
+</body>
+</html>
