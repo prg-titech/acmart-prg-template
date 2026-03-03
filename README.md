@@ -2,17 +2,23 @@
 
 # LaTeX Compilation with Makefile
 
-This repository contains the LaTeX source file `main.tex` and a Makefile to facilitate the compilation process using the `acmart` class.
+This repository contains the paper source `main.tex`, the supplementary source `supplementary/main.tex`, and Makefiles for building both documents.
 
 Faculty members can write review comments using commands like `\HM{...}` to include comments with their initials.
 
 ## Prerequisites
 
-Ensure you have the following installed on your system:
+Ensure you have the following installed:
 
 - LaTeX distribution (TeX Live, etc.)
 - `pdflatex`
 - `bibtex`
+- `make`
+
+Optional tools:
+
+- `tectonic` for `TEX_ENGINE=tectonic`
+- `latexdiff` for `make diff`
 
 ## Instructions
 
@@ -26,26 +32,69 @@ git clone <your-forked-repository-url>
 cd <repository-directory>
 ```
 
-## How to make your paper
-### Compile the LaTeX Document
+## Build
 
-Simply run the make command in the terminal:
+### Main paper
+
+Build the main paper from the repository root:
 
 ```bash
 make
 ```
 
-### Clean Up Auxiliary Files
-To remove auxiliary files generated during the compilation, use:
+This generates `main.pdf`.
+
+### Supplementary document
+
+Build the supplementary document from the repository root:
+
+```bash
+make supplementary
+```
+
+This generates `supplementary/main.pdf`.
+
+You can also build it from inside the `supplementary` directory:
+
+```bash
+cd supplementary
+make
+```
+
+### Use Tectonic instead of pdflatex
+
+Both Makefiles support overriding the TeX engine:
+
+```bash
+make TEX_ENGINE=tectonic
+make supplementary TEX_ENGINE=tectonic
+```
+
+## Clean
+
+### Remove generated files
+
+At the repository root, `make clean` removes auxiliary files and generated PDFs for both the main paper and the supplementary document:
 
 ```bash
 make clean
 ```
 
-### Full Clean-Up
+Inside `supplementary`, `make clean` removes the supplementary auxiliary files and `supplementary/main.pdf`.
+
+## Diff PDF
+
+Generate a diff PDF against a tag or commit:
 
 ```bash
-make distclean
+make diff DIFFTO=<tag-or-commit>
+```
+
+For the supplementary document:
+
+```bash
+cd supplementary
+make diff DIFFTO=<tag-or-commit>
 ```
 
 ## GitHub CI for Automatic Publish
