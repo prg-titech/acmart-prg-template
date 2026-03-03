@@ -4,8 +4,37 @@ on:
   schedule:
     - cron: '0 0 * * 0' # every Sunday at midnight
   push:
+    branches-ignore:
+      - publish
+    paths:
+      - '.github/workflows/build-and-publish.yml'
+      - 'Makefile'
+      - '*.tex'
+      - '*.bib'
+      - '*.cls'
+      - '*.sty'
+      - '*.bst'
+      - '*.bbx'
+      - '*.cbx'
+      - '*.dbx'
+      - 'sections/**'
+      - 'supplementary/**'
+  pull_request:
     branches:
       - main
+    paths:
+      - '.github/workflows/build-and-publish.yml'
+      - 'Makefile'
+      - '*.tex'
+      - '*.bib'
+      - '*.cls'
+      - '*.sty'
+      - '*.bst'
+      - '*.bbx'
+      - '*.cbx'
+      - '*.dbx'
+      - 'sections/**'
+      - 'supplementary/**'
   workflow_dispatch:
 
 permissions:
@@ -20,45 +49,21 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Compute cache key (no hashFiles)
-      id: ott-cache-key
+    - name: Compute Tectonic cache bucket
+      id: tectonic-cache-key
       shell: bash
       run: |
         set -euo pipefail
-        key=$(
-          git ls-files -z '*.bib' \
-          | sort -z \
-          | xargs -0 sha256sum \
-          | sha256sum \
-          | cut -d' ' -f1
-        )
-        echo "key=$key" >> "$GITHUB_OUTPUT"
+        echo "week=$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
 
-    - name: Cache intermediate files
-      id: cache-intermediate
+    - name: Cache Tectonic downloads
       uses: actions/cache@v4
       with:
         path: |
-          *.tex
-          *.aux
-          *.sys
-          sections/*.tex
-          sections/*.aux
-          supplementary/*.tex
-          supplementary/*.aux
-          supplementary/*.sys
-          supplementary/defns/*.tex
-          supplementary/defns/*.aux
-          supplementary/props/*.tex
-          supplementary/props/*.aux
-          supplementary/tikz/*.tex
-          supplementary/tikz/*.aux
-          supplementary/sections/*.tex
-          supplementary/sections/*.aux
           ~/.cache/Tectonic
-        key: "${{ runner.os }}-ott-cache-${{ steps.ott-cache-key.outputs.key }}"
+        key: "${{ runner.os }}-tectonic-cache-v2-${{ steps.tectonic-cache-key.outputs.week }}"
         restore-keys: |
-          ${{ runner.os }}-ott-cache-
+          ${{ runner.os }}-tectonic-cache-v2-
 
     - name: Setup Tectonic
       uses: wtfjoke/setup-tectonic@v3
