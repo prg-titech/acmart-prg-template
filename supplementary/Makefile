@@ -1,10 +1,9 @@
-.PHONY: all main supplementary clean distclean diff
+.PHONY: all main clean distclean diff
 
 # === User Configurable ===
 
 MAIN ?= main
-SUPPLEMENTARY_DIR ?= supplementary
-SUPPLEMENTARY_MAIN ?= $(SUPPLEMENTARY_DIR)/main
+ROOT_DIR ?= ..
 
 TEX_ENGINE ?= pdflatex
 TEX_ENGINE_OPTIONS ?= -interaction=nonstopmode -file-line-error -synctex=1
@@ -16,17 +15,14 @@ DIFFTO ?= <your-default-tag-here>
 # =========================
 
 LATEX := $(TEX_ENGINE) $(TEX_ENGINE_OPTIONS)
+TEX_PATHS := .:$(ROOT_DIR):
+BST_PATHS := .:$(ROOT_DIR):
+BIB_PATHS := .:$(ROOT_DIR):
 
 MAIN_DEPS := \
 	$(MAIN).tex \
-	$(MAIN).bib \
-	$(wildcard sections/*.tex) \
-	$(wildcard *.cls *.sty *.bst *.bbx *.cbx *.dbx)
-
-SUPPLEMENTARY_DEPS := \
-	$(SUPPLEMENTARY_MAIN).tex \
-	$(MAIN).bib \
-	$(wildcard *.cls *.sty *.bst *.bbx *.cbx *.dbx)
+	$(ROOT_DIR)/main.bib \
+	$(wildcard $(ROOT_DIR)/*.cls $(ROOT_DIR)/*.sty $(ROOT_DIR)/*.bst $(ROOT_DIR)/*.bbx $(ROOT_DIR)/*.cbx $(ROOT_DIR)/*.dbx)
 
 MAIN_AUX := \
 	$(MAIN).aux \
@@ -40,45 +36,24 @@ MAIN_AUX := \
 	$(MAIN).synctex.gz \
 	$(MAIN).toc
 
-SUPPLEMENTARY_AUX := \
-	$(SUPPLEMENTARY_MAIN).aux \
-	$(SUPPLEMENTARY_MAIN).bbl \
-	$(SUPPLEMENTARY_MAIN).blg \
-	$(SUPPLEMENTARY_MAIN).fdb_latexmk \
-	$(SUPPLEMENTARY_MAIN).fls \
-	$(SUPPLEMENTARY_MAIN).log \
-	$(SUPPLEMENTARY_MAIN).loe \
-	$(SUPPLEMENTARY_MAIN).out \
-	$(SUPPLEMENTARY_MAIN).synctex.gz \
-	$(SUPPLEMENTARY_MAIN).toc
-
 all: $(MAIN).pdf
 
 main: $(MAIN).pdf
 
-supplementary: $(SUPPLEMENTARY_MAIN).pdf
-
 $(MAIN).pdf: $(MAIN_DEPS)
 	@echo "[INFO] Compiling $(MAIN).tex with $(TEX_ENGINE)"
 ifeq ($(TEX_ENGINE),tectonic)
-	$(LATEX) -Z continue-on-errors $(MAIN).tex
+	TEXINPUTS=$(TEX_PATHS) BSTINPUTS=$(BST_PATHS) BIBINPUTS=$(BIB_PATHS) \
+		$(LATEX) -Z continue-on-errors $(MAIN).tex
 else
-	$(LATEX) $(MAIN).tex
-	-$(BIB_ENGINE) $(MAIN)
-	$(LATEX) $(MAIN).tex
-	$(LATEX) $(MAIN).tex
-endif
-	@echo "[INFO] PDF generated: $@"
-
-$(SUPPLEMENTARY_MAIN).pdf: $(SUPPLEMENTARY_DEPS)
-	@echo "[INFO] Compiling $(SUPPLEMENTARY_MAIN).tex with $(TEX_ENGINE)"
-ifeq ($(TEX_ENGINE),tectonic)
-	$(LATEX) -Z continue-on-errors --outdir $(SUPPLEMENTARY_DIR) $(SUPPLEMENTARY_MAIN).tex
-else
-	$(LATEX) -output-directory=$(SUPPLEMENTARY_DIR) $(SUPPLEMENTARY_MAIN).tex
-	-BIBINPUTS=.:$(SUPPLEMENTARY_DIR): $(BIB_ENGINE) $(SUPPLEMENTARY_MAIN)
-	$(LATEX) -output-directory=$(SUPPLEMENTARY_DIR) $(SUPPLEMENTARY_MAIN).tex
-	$(LATEX) -output-directory=$(SUPPLEMENTARY_DIR) $(SUPPLEMENTARY_MAIN).tex
+	TEXINPUTS=$(TEX_PATHS) BSTINPUTS=$(BST_PATHS) BIBINPUTS=$(BIB_PATHS) \
+		$(LATEX) $(MAIN).tex
+	-TEXINPUTS=$(TEX_PATHS) BSTINPUTS=$(BST_PATHS) BIBINPUTS=$(BIB_PATHS) \
+		$(BIB_ENGINE) $(MAIN)
+	TEXINPUTS=$(TEX_PATHS) BSTINPUTS=$(BST_PATHS) BIBINPUTS=$(BIB_PATHS) \
+		$(LATEX) $(MAIN).tex
+	TEXINPUTS=$(TEX_PATHS) BSTINPUTS=$(BST_PATHS) BIBINPUTS=$(BIB_PATHS) \
+		$(LATEX) $(MAIN).tex
 endif
 	@echo "[INFO] PDF generated: $@"
 
@@ -88,11 +63,11 @@ diff:
 		echo "Error: DIFFTO not set. Usage: make diff DIFFTO=<tag-or-commit>"; \
 		exit 1; \
 	fi
-	@if content=$$(git show $(DIFFTO):$(MAIN).tex 2>/dev/null); then \
+	@if content=$$(git show $(DIFFTO):supplementary/$(MAIN).tex 2>/dev/null); then \
 		printf '%s\n' "$$content" > $(MAIN)_old.tex; \
-		echo "[INFO] Successfully extracted $(MAIN).tex from $(DIFFTO)"; \
+		echo "[INFO] Successfully extracted supplementary/$(MAIN).tex from $(DIFFTO)"; \
 	else \
-		echo "[ERROR] Failed to extract $(MAIN).tex from $(DIFFTO)."; \
+		echo "[ERROR] Failed to extract supplementary/$(MAIN).tex from $(DIFFTO)."; \
 		exit 1; \
 	fi
 	latexdiff --flatten \
@@ -110,20 +85,25 @@ diff:
 		--config='PICTUREENV=(?:picture|DIFnomarkup|lstlisting)[\w\d*@]*' \
 		$(MAIN)_old.tex $(MAIN).tex > $(MAIN)_diff.tex
 ifeq ($(TEX_ENGINE),tectonic)
-	$(LATEX) -Z continue-on-errors $(MAIN)_diff.tex
+	TEXINPUTS=$(TEX_PATHS) BSTINPUTS=$(BST_PATHS) BIBINPUTS=$(BIB_PATHS) \
+		$(LATEX) -Z continue-on-errors $(MAIN)_diff.tex
 else
-	$(LATEX) $(MAIN)_diff.tex
-	-$(BIB_ENGINE) $(MAIN)_diff
-	$(LATEX) $(MAIN)_diff.tex
-	$(LATEX) $(MAIN)_diff.tex
+	TEXINPUTS=$(TEX_PATHS) BSTINPUTS=$(BST_PATHS) BIBINPUTS=$(BIB_PATHS) \
+		$(LATEX) $(MAIN)_diff.tex
+	-TEXINPUTS=$(TEX_PATHS) BSTINPUTS=$(BST_PATHS) BIBINPUTS=$(BIB_PATHS) \
+		$(BIB_ENGINE) $(MAIN)_diff
+	TEXINPUTS=$(TEX_PATHS) BSTINPUTS=$(BST_PATHS) BIBINPUTS=$(BIB_PATHS) \
+		$(LATEX) $(MAIN)_diff.tex
+	TEXINPUTS=$(TEX_PATHS) BSTINPUTS=$(BST_PATHS) BIBINPUTS=$(BIB_PATHS) \
+		$(LATEX) $(MAIN)_diff.tex
 endif
 	@echo "[INFO] Diff PDF generated: $(MAIN)_diff.pdf"
 
 clean:
-	$(RM) $(MAIN_AUX) $(SUPPLEMENTARY_AUX)
+	$(RM) $(MAIN_AUX)
 	$(RM) $(MAIN)_old.tex $(MAIN)_diff.tex $(MAIN)_diff.pdf
 	$(RM) $(MAIN)_diff.aux $(MAIN)_diff.bbl $(MAIN)_diff.blg $(MAIN)_diff.fls
-	$(RM) $(MAIN)_diff.log $(MAIN)_diff.out $(MAIN)_diff.synctex.gz
-	$(RM) $(MAIN).pdf $(SUPPLEMENTARY_MAIN).pdf
+	$(RM) $(MAIN)_diff.log $(MAIN)_diff.loe $(MAIN)_diff.out $(MAIN)_diff.synctex.gz
+	$(RM) $(MAIN).pdf
 
 distclean: clean
