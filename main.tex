@@ -45,7 +45,17 @@
 %% for your publication.
 %%
 %%
-\documentclass[manuscript,review,screen,nonacm,sigplan]{acmart}
+\newif\ifanonymous
+% \anonymousfalse
+\anonymoustrue
+
+\ifanonymous
+\documentclass[acmsmall,screen,review,anonymous,nonacm]{acmart}
+\else
+\documentclass[acmsmall]{acmart}
+% \documentclass[acmsmall,screen,nonacm]{acmart}
+% \documentclass[acmsmall,screen,review,nonacm]{acmart}
+\fi
 
 %%
 %% \BibTeX command to typeset BibTeX logo in the docs
@@ -121,6 +131,13 @@
 \usepackage{xcolor}
 \usepackage{bussproofs}
 
+
+\newtheorem{theorem}{Theorem}[section]
+\newcommand{\refsec}[1]{Section~\ref{sec:#1}}
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Section}
+
+
 %%%% macros to add comments
 \newif\ifdraftComments
 \draftCommentsfalse
@@ -132,6 +149,10 @@
 \mkDraftFn{YT}{red}
 
 \draftCommentstrue
+
+
+\citestyle{acmauthoryear}
+
 
 %%
 %% end of the preamble, start of the body of the document source.
@@ -151,9 +172,9 @@
 
 \author{Your Name}
 \orcid{If you don't have orcid, please get one.}
-\email{your_address@prg,is.titech.ac.jp}
+\email{your_address@prg.is.titech.ac.jp}
 \affiliation{%
-  \institution{Tokyo Institute of Technology\\(Institute of Science Tokyo from October 2024)}
+  \institution{Institute of Science Tokyo}
   \city{Tokyo}
   \country{Japan}
 }
@@ -162,7 +183,7 @@
 \orcid{0000-0003-2315-6182}
 \email{cong@c.titech.ac.jp}
 \affiliation{%
-  \institution{Tokyo Institute of Technology\\(Institute of Science Tokyo from October 2024)}
+  \institution{Institute of Science Tokyo}
   \city{Tokyo}
   \country{Japan}
 }
@@ -171,7 +192,7 @@
 \email{yudaitnb@prg.is.titech.ac.jp}
 \orcid{0000-0002-7990-0989}
 \affiliation{%
-  \institution{Tokyo Institute of Technology\\(Institute of Science Tokyo from October 2024)}
+  \institution{Institute of Science Tokyo}
   \city{Tokyo}
   \country{Japan}
 }
@@ -180,7 +201,7 @@
 \orcid{0000-0002-8837-5303}
 \email{masuhara@acm.org}
 \affiliation{%
-  \institution{Tokyo Institute of Technology\\(Institute of Science Tokyo from October 2024)}
+  \institution{Institute of Science Tokyo}
   \city{Tokyo}
   \country{Japan}
 }
@@ -191,13 +212,13 @@
 %% other information printed in the page headers. This command allows
 %% the author to define a more concise list
 %% of authors' names for this purpose.
-\renewcommand{\shortauthors}{Yout family name et al.}
+\renewcommand{\shortauthors}{Your family name et al.}
 
 %%
 %% The abstract is a short summary of the work to be presented in the
 %% article.
 \begin{abstract}
-\HM{Write the contents!}
+ \input{sections/abstract}
 % A clear and well-documented \LaTeX\ document is presented as an
 % article formatted for publication by ACM in a conference proceedings
 % or journal publication. Based on the ``acmart'' document class, this
@@ -239,12 +260,12 @@
 %% information and builds the first part of the formatted document.
 \maketitle
 
-\section{Introduction}
-\section{Background}
-\section{Method}
-\section{Evaluation}
-\section{Related Work}
-\section{Contribution}
+\input{sections/introduction}
+\input{sections/background}
+\input{sections/method}
+\input{sections/evaluation}
+\input{sections/related}
+\input{sections/conclusion}
 
 %%
 %% The acknowledgments section is defined using the "acks" environment
@@ -252,25 +273,29 @@
 %% identification of the section in the article metadata, and the
 %% consistent spelling of the heading.
 \begin{acks}
-  The author would like to thank ...
+%% acks environment is optional
+We would like to thank the anonymous reviewers of the XXXX 20XX program
+committee for their fruitful comments.
+%
+This work was supported in part by
+%
+JSPS KAKENHI Grant Numbers 
+JPyyXnnnnn
+.
 \end{acks}
 
 %%
 %% The next two lines define the bibliography style to be used, and
 %% the bibliography file.
 \bibliographystyle{ACM-Reference-Format}
-\bibliography{sample-base}
+\bibliography{main}
 
 
 %%
 %% If your work has an appendix, this is the place to put it.
 \appendix
 
-\section{Research Methods}
-
-\subsection{Part One}
-
-\subsection{Part Two}
+\input{sections/appendix}
 
 \end{document}
 \endinput

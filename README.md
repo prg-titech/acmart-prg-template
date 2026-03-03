@@ -1,3 +1,5 @@
+<h1 align="center">Check the <code>publish</code> Branch for PDF Artifacts</h1>
+
 # LaTeX Compilation with Makefile
 
 This repository contains the LaTeX source file `main.tex` and a Makefile to facilitate the compilation process using the `acmart` class.
@@ -45,3 +47,7 @@ make clean
 ```bash
 make distclean
 ```
+
+## GitHub CI for Automatic Publish
+
+This repository supports automatic PDF publishing with GitHub Actions. The workflow defined in [`.github/workflows/build-and-publish.yml`](https://github.com/prg-titech/acmart-prg-template/blob/main/.github/workflows/build-and-publish.yml) builds `main.tex` with [Tectonic](https://tectonic-typesetting.github.io/en-US/) on pushes to `main`, weekly scheduled runs, or manual dispatch, then publishes generated PDFs to the `publish` branch for GitHub Pages hosting.

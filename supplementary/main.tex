@@ -1,0 +1,117 @@
+\newif\ifdraft \drafttrue
+\newif\ifeng \engtrue
+
+\documentclass[a4paper]{article}
+\usepackage{graphicx}
+\usepackage[top=30truemm, left=20truemm, right=20truemm]{geometry}
+\usepackage[table]{xcolor}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{thm-restate}
+\usepackage{mathtools}
+\usepackage{fontawesome5}
+\usepackage{subcaption}
+\renewcommand\thesubfigure{(\arabic{subfigure})}
+\captionsetup[subfigure]{labelformat=simple}
+
+% for tables
+\usepackage{makecell}
+\usepackage{tablefootnote}
+
+\usepackage{bm}
+\usepackage{stmaryrd}
+\usepackage{bussproofs}
+\usepackage{comment}
+\usepackage{enumitem}
+\usepackage{todonotes}
+\usepackage{lscape}
+\usepackage{multirow}
+\usepackage{thmtools}
+\usepackage{hyperref}
+\usepackage{xr}
+\externaldocument[m:]{../paper}
+\bibliographystyle{plain}
+\newcommand{\Name}[2]{(\textsc{#1\_#2})}
+\newcommand{\size}{\mathrm{size}}
+\newcommand{\height}{\mathrm{height}}
+\newcommand{\defeq}{\stackrel{\rm \tiny def}{=}}
+
+\renewcommand{\arraystretch}{1.2}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\usepackage{listings}
+\usepackage{ulem}
+
+\theoremstyle{definition}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}{Example}[section]
+\newtheorem{corollary}[theorem]{Corollary}
+\renewcommand\proofname{\bf Proof}
+
+\newcommand{\refdef}[1]{Definition~\ref{def:#1}}
+\newcommand{\reflem}[1]{Lemma~\ref{lem:#1}}
+\newcommand{\refthm}[1]{Theorem~\ref{thm:#1}}
+\newcommand{\refcor}[1]{Corollary~\ref{col:#1}}
+\newcommand{\refdefcase}[2]{Definition~\ref{def:#1} (\ref{def:#1:#2})}
+\newcommand{\reflemcase}[2]{Lemma~\ref{lem:#1} (\ref{lem:#1:#2})}
+\newcommand{\refthmcase}[2]{Theorem~\ref{thm:#1} (\ref{thm:#1:#2})}
+\newcommand{\refcolcase}[2]{Corollary~\ref{col:#1} (\ref{col:#1:#2})}
+\newenvironment{lem}[2][\relax]
+{\begin{lemma}[#1] \label{lem:#2} \noindent}
+{\end{lemma}}
+% \newenvironment{lem}[1]
+% {\begin{lemma} \label{lem:#1} \noindent}
+% {\end{lemma}}
+
+\newenvironment{caseanalysis}
+{\begin{description}[leftmargin=1.2em]}
+{\end{description}}
+\def\case#1:{\item[\textmd{Case {#1}:}]}
+\def\otherwise:{\item[\textmd{Otherwise:}]}
+
+%%%% macros to add comments
+\newif\ifdraftComments
+\draftCommentstrue
+\def\mkDraftFn#1#2{%
+  \expandafter\def\csname #1\endcsname##1{\ifdraftComments\textcolor{#2}{[#1: ##1]}\marginpar[$\longrightarrow$]{$\longleftarrow$}\fi}%
+}
+\mkDraftFn{HM}{orange}
+\mkDraftFn{YC}{blue}
+\mkDraftFn{YT}{red}
+
+\renewcommand\thesection{\Alph{section}}
+
+% Tikz settings
+% \usepackage{tikz}
+% \usetikzlibrary{arrows.meta,positioning,calc,shapes.multipart}
+
+% \tikzset{
+% }
+
+% symbols (for the comparison table)
+\usepackage{pifont}   % for \ding
+\usepackage{booktabs}
+
+\begin{document}
+
+\title{Supplementary Material for \\ ``Nice Work''}
+\author{Your Name}
+\date{\today}
+
+\maketitle
+
+\tableofcontents
+
+\listoftheorems
+
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{main}
+
+\end{document}
+ 

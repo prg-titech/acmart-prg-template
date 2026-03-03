@@ -1,0 +1,209 @@
+name: Build and Deploy Paper PDFs
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # every Sunday at midnight
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Compute cache key (no hashFiles)
+      id: ott-cache-key
+      shell: bash
+      run: |
+        set -euo pipefail
+        key=$(
+          git ls-files -z '*.bib' \
+          | sort -z \
+          | xargs -0 sha256sum \
+          | sha256sum \
+          | cut -d' ' -f1
+        )
+        echo "key=$key" >> "$GITHUB_OUTPUT"
+
+    - name: Cache intermediate files
+      id: cache-intermediate
+      uses: actions/cache@v4
+      with:
+        path: |
+          *.tex
+          *.aux
+          *.sys
+          sections/*.tex
+          sections/*.aux
+          supplementary/*.tex
+          supplementary/*.aux
+          supplementary/*.sys
+          supplementary/defns/*.tex
+          supplementary/defns/*.aux
+          supplementary/props/*.tex
+          supplementary/props/*.aux
+          supplementary/tikz/*.tex
+          supplementary/tikz/*.aux
+          supplementary/sections/*.tex
+          supplementary/sections/*.aux
+          ~/.cache/Tectonic
+        key: "${{ runner.os }}-ott-cache-${{ steps.ott-cache-key.outputs.key }}"
+        restore-keys: |
+          ${{ runner.os }}-ott-cache-
+
+    - name: Setup Tectonic
+      uses: wtfjoke/setup-tectonic@v3
+
+    - name: Run Build Recipe (main)
+      run: |
+        tectonic main.tex -Z continue-on-errors
+
+    - name: Run Build Recipe (supplementary if exists)
+      run: |
+        if [ -f supplementary/main.tex ]; then
+          echo "[INFO] supplementary/main.tex detected, building supplementary_main.pdf"
+          
+          cd supplementary
+          export PATH=$(pwd)/../vendor:$PATH
+
+          tectonic main.tex -Z continue-on-errors
+          cd ..
+        else
+          echo "[INFO] supplementary/main.tex not found. Skipping supplementary build."
+        fi
+
+    - name: Collect generated PDFs into dist/
+      run: |
+        mkdir -p dist
+        [ -f main.pdf ] && mv main.pdf dist/main.pdf
+        [ -f supplementary/main.pdf ] && mv supplementary/main.pdf dist/supplementary_main.pdf
+        ls -lh dist/
+
+    - name: Upload generated PDFs as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: latex-output
+        path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: latex-output
+        path: ./publish
+
+    - name: Create index.html for GitHub Pages
+      run: |
+        cat > publish/index.html << 'EOF'
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>OTT Generated PDFs</title>
+            <style>
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    max-width: 800px;
+                    margin: 0 auto;
+                    padding: 2rem;
+                    line-height: 1.6;
+                }
+                .header {
+                    text-align: center;
+                    margin-bottom: 2rem;
+                    padding-bottom: 1rem;
+                    border-bottom: 2px solid #eee;
+                }
+                .pdf-list {
+                    list-style: none;
+                    padding: 0;
+                }
+                .pdf-item {
+                    background: #f8f9fa;
+                    margin-bottom: 1rem;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    border-left: 4px solid #007acc;
+                }
+                .pdf-link {
+                    text-decoration: none;
+                    color: #007acc;
+                    font-weight: 500;
+                    font-size: 1.1rem;
+                }
+                .pdf-link:hover {
+                    text-decoration: underline;
+                }
+                .build-info {
+                    background: #e9ecef;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    margin-top: 2rem;
+                    font-size: 0.9rem;
+                    color: #666;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>OTT Generated Documents</h1>
+                <p>Automatically generated PDF documents from the OTT project</p>
+            </div>
+
+            <ul class="pdf-list">
+        EOF
+
+        for pdf in publish/*.pdf; do
+            if [ -f "$pdf" ]; then
+                filename=$(basename "$pdf")
+                echo "                <li class=\"pdf-item\">" >> publish/index.html
+                echo "                    <a href=\"$filename\" class=\"pdf-link\">📄 $filename</a>" >> publish/index.html
+                echo "                </li>" >> publish/index.html
+            fi
+        done
+
+        cat >> publish/index.html << 'EOF'
+            </ul>
+
+            <div class="build-info">
+                <strong>Build Information:</strong><br>
+                Generated: <span id="build-date"></span><br>
+                Commit: <a href="https://github.com/${{ github.repository }}/commit/${{ github.sha }}">${{ github.sha }}</a><br>
+                Branch: ${{ github.ref_name }}
+            </div>
+
+            <script>
+                document.getElementById('build-date').textContent = new Date().toLocaleString();
+            </script>
+        </body>
+        </html>
+        EOF
+
+    - name: Deploy to publish branch
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./publish
+        publish_branch: publish
+        force_orphan: true
+        commit_message: 'Deploy PDFs from ${{ github.sha }}'
